@@ -61,6 +61,8 @@ def probas_du_texte(sequences, paires, contextes, taille_V, k):
     for tokens in sequences:
         bordee = encadrer(tokens)
         for v, w in zip(bordee, bordee[1:]):
+            if w == FIN_SEQ:
+                continue
             if k == 0:
                 probas.append(proba(v, w, paires, contextes))
             else:

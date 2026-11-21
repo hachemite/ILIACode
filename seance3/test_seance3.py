@@ -38,7 +38,7 @@ def test_p1_encadrer():
 
 def test_p1_compter_la_table():
     paires, contextes = tables()
-    assert contextes[DEBUT] == 5 and contextes["in"] == 3 and contextes["tickets"] == 1
+    assert contextes[DEBUT] == 5 and contextes["in"] == 4 and contextes["tickets"] == 1
     assert contextes["queue"] == 2 and contextes["users"] == 1
     assert contextes["if"] == 1 and contextes["is"] == 1
     assert contextes["ticket"] == 4 and contextes["user"] == 1  # # jamais vu
@@ -54,14 +54,14 @@ def test_p2_proba_lue_dans_la_table():
 
 
 def test_p2_predire_apres_in():
-    assert predire("in", *tables()) == [("tickets", 0.5), ("queue", 0.25), ("users", 0.25)]
+    assert predire("in", *tables()) == [("queue", 0.5), ("tickets", 0.25), ("users", 0.25)]
 
 
 def test_p2_proba_d_une_ligne():
     vue = probas_du_texte([["for", "ticket", "in", "tickets"]], *tables(), TAILLE_V_MINI, 0)
-    assert produit(vue) == pytest.approx(0.225)
+    assert produit(vue) == pytest.approx(0.1125)
     nouvelle = probas_du_texte([["for", "user", "in", "queue"]], *tables(), TAILLE_V_MINI, 0)
-    assert produit(nouvelle) == pytest.approx(0.05)   # jamais écrite, pourtant possible
+    assert produit(nouvelle) == pytest.approx(0.1)   # jamais écrite, pourtant possible
     cassee = probas_du_texte([["if", "user", "is", "None"]], *tables(), TAILLE_V_MINI, 0)
     assert produit(cassee) == 0                          # un seul zéro détruit le produit
 
@@ -108,8 +108,8 @@ def test_p4_un_zero_rend_la_perplexite_infinie():
 def test_p5_perplexite_du_bigramme_lisse():
     vue = probas_du_texte([["for", "ticket", "in", "tickets"]], *tables(), TAILLE_V_MINI, 1)
     nouvelle = probas_du_texte([["if", "user", "is", "None"]], *tables(), TAILLE_V_MINI, 1)
-    assert perplexite(vue) == pytest.approx(3.96, abs=0.01)
-    assert perplexite(nouvelle) == pytest.approx(8.39, abs=0.01)
+    assert perplexite(vue) == pytest.approx(4.286, abs=0.01)
+    assert perplexite(nouvelle) == pytest.approx(9.118, abs=0.01)
     assert perplexite(vue) < perplexite(nouvelle)          # le déjà-vu surprend moins
 
 
