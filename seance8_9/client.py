@@ -15,12 +15,39 @@ def lire_reglages(chemin="../seance7/reglages.json"):
 
 
 def plier(mot):
-    return mot
+    if mot.lower() in LEXIQUE or "_" in mot or re.search("[a-z][A-Z]", mot):
+        return mot
+    mot = re.sub(r"([^\W\d_])\1{2,}", r"\1", mot.lower())
+    return mot.replace("sh", "ch")
 
 
 def canonicaliser(texte):
-    return texte
+    morceaux = texte.split("```")
+    for i in range(0, len(morceaux), 2):
+        sans_signes = re.sub(r"[\u064b-\u0652\u0640]", "", morceaux[i])
+        morceaux[i] = re.sub(r"\w+", lambda m: plier(m.group()), sans_signes)
+    return "```".join(morceaux)
 
 
 def demander(texte, type_demande, modele="moteur", n_max=400):
-    raise NotImplementedError("demander est à écrire à l'étape 1.3")
+    reglage = lire_reglages()[type_demande]
+    corps = {
+        "model": modele,
+        "messages": [{"role": "user", "content": canonicaliser(texte)}],
+        "max_tokens": n_max,
+        "temperature": reglage["temperature"],
+        "top_p": reglage["p_noyau"],
+        "seed": 0,
+        "stop_token_ids": [FIN],
+    }
+    requete = urllib.request.Request(
+        ADRESSE + "/v1/chat/completions",
+        data=json.dumps(corps).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + os.environ["CLE_ILIACODE"],
+        },
+    )
+    with urllib.request.urlopen(requete, timeout=300) as reponse:
+        choix = json.loads(reponse.read())["choices"][0]
+        return choix["message"]["content"], choix["finish_reason"] == "stop"
